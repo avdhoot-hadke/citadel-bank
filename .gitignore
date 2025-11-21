@@ -58,3 +58,6 @@ target/
 
 ### Temporary / Cache ###
 /tmp/
+
+# IntelliJ run configuration files
+*.run.xml
