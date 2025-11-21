@@ -14,7 +14,7 @@ target/
 .sts4-cache
 
 ### IntelliJ IDEA ###
-.idea
+.idea/
 *.iws
 *.iml
 *.ipr
@@ -31,3 +31,30 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Environment / Secrets ###
+.env
+*.env
+.env.*
+.DS_Store
+
+### Logs ###
+logs/
+*.log
+spring.log
+
+### OS / Machine Files ###
+**/.DS_Store
+Thumbs.db
+
+### Java ###
+*.class
+
+### Maven ###
+.mvn/
+!/.mvn/wrapper/maven-wrapper.jar
+.settings/
+target/
+
+### Temporary / Cache ###
+/tmp/
