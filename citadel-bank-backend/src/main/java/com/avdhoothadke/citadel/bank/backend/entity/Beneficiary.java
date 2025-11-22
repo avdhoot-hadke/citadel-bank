@@ -3,21 +3,24 @@ package com.avdhoothadke.citadel.bank.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class PasswordResetToken {
+@NoArgsConstructor
+@Builder
+@Table(name = "beneficiaries")
+public class Beneficiary {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String token;
-    private LocalDateTime expiryDate;
+    private String name;
+    private String accountNumber;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
+
+    private boolean active = false;
+
 }

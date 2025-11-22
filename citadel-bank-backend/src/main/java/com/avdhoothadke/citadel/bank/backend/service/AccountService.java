@@ -15,14 +15,20 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AccountService {
     private final AccountRepository accountRepository;
-    private final UserRepository usesRepository;
+    private final UserRepository userRepository;
 
     public Account createAccount(String accountType) {
         String username = SecurityUtils.getCurrentUserName();
-        User user = usesRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found!"));
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        String accountNumber = String.valueOf((long) (Math.random() * 9000000000L) + 1000000000L);
+        String accountNumber;
+        boolean isUnique = false;
+
+        do {
+            accountNumber = generateAccountNumber();
+            if (accountRepository.findByAccountNumber(accountNumber).isEmpty()) isUnique = true;
+        } while (!isUnique);
 
         Account account = Account.builder()
                 .accountNumber(accountNumber)
@@ -30,12 +36,19 @@ public class AccountService {
                 .accountType(accountType.toUpperCase())
                 .user(user)
                 .build();
+
         return accountRepository.save(account);
+
+    }
+
+    private String generateAccountNumber() {
+        long number = (long) (Math.random() * 9000000000L) + 1000000000L;
+        return String.valueOf(number);
     }
 
     public List<Account> getCurrentUserAccounts() {
         String username = SecurityUtils.getCurrentUserName();
-        User user = usesRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         return accountRepository.findByUserId(user.getId());
