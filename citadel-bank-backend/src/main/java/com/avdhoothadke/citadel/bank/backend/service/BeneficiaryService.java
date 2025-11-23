@@ -8,9 +8,9 @@ import com.avdhoothadke.citadel.bank.backend.repository.BeneficiaryRepository;
 import com.avdhoothadke.citadel.bank.backend.repository.UserRepository;
 import com.avdhoothadke.citadel.bank.backend.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -45,10 +45,10 @@ public class BeneficiaryService {
         return beneficiaryRepository.save(beneficiary);
     }
 
-    public List<Beneficiary> getMyBeneficiaries() {
+    public Page<Beneficiary> getMyBeneficiaries(Pageable pageable) {
         String username = SecurityUtils.getCurrentUserName();
         User currentUser = userRepository.findByUsername(username)
                 .orElseThrow();
-        return beneficiaryRepository.findByUserId(currentUser.getId());
+        return beneficiaryRepository.findByUserId(currentUser.getId(), pageable);
     }
 }
