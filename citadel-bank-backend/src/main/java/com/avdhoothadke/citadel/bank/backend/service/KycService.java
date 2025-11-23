@@ -1,0 +1,34 @@
+package com.avdhoothadke.citadel.bank.backend.service;
+
+import com.avdhoothadke.citadel.bank.backend.entity.KycDocument;
+import com.avdhoothadke.citadel.bank.backend.entity.KycStatus;
+import com.avdhoothadke.citadel.bank.backend.entity.User;
+import com.avdhoothadke.citadel.bank.backend.repository.KycRepository;
+import com.avdhoothadke.citadel.bank.backend.repository.UserRepository;
+import com.avdhoothadke.citadel.bank.backend.util.SecurityUtils;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+@Service
+@RequiredArgsConstructor
+public class KycService {
+    private final KycRepository kycRepository;
+    private final UserRepository userRepository;
+    private final FileStorageService fileStorageService;
+
+    public KycDocument uploadKyc(MultipartFile file, String documentType) {
+        String username = SecurityUtils.getCurrentUserName();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+
+        String fileUrl = fileStorageService.storeFile(file);
+
+        KycDocument kyc = new KycDocument();
+        kyc.setDocumentType(documentType);
+        kyc.setDocumentUrl(fileUrl);
+        kyc.setStatus(KycStatus.PENDING);
+        kyc.setUser(user);
+
+        return kycRepository.save(kyc);
+    }
+}
