@@ -9,6 +9,7 @@ import com.avdhoothadke.citadel.bank.backend.repository.PasswordResetTokenReposi
 import com.avdhoothadke.citadel.bank.backend.repository.RoleRepository;
 import com.avdhoothadke.citadel.bank.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,10 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+
+    @Value("${app.base-url}")
+    private String baseUrl;
 
     public User registerUser(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -56,6 +61,9 @@ public class UserService {
         myToken.setExpiryDate(LocalDateTime.now().plusHours(24));
 
         passwordResetTokenRepository.save(myToken);
+
+        String link = baseUrl + "/api/auth/reset-password?token=" + token;
+        emailService.sendEmail(email, "Password Reset Request", "Click here to reset your password: " + link);
     }
 
     public void resetPassword(String token, String newPassword) {
