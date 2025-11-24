@@ -33,4 +33,11 @@ public class BeneficiaryController {
     public ResponseEntity<Page<Beneficiary>> getBeneficiaries(Pageable pageable) {
         return ResponseEntity.ok(beneficiaryService.getMyBeneficiaries(pageable));
     }
+
+    @PostMapping("/validate-otp")
+    public ResponseEntity<String> validateOtp(@RequestBody Map<String, String> request) {
+        Long id = Long.parseLong(request.get("beneficiaryId"));
+        String otp = request.get("otp");
+        return ResponseEntity.ok(beneficiaryService.validateOtp(id, otp));
+    }
 }

@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.security.SecureRandom;
 import java.util.List;
 
 @Service
@@ -16,9 +17,11 @@ import java.util.List;
 public class AccountService {
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
+    private static final SecureRandom secureRandom = new SecureRandom();
 
     public Account createAccount(String accountType) {
         String username = SecurityUtils.getCurrentUserName();
+
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -38,16 +41,16 @@ public class AccountService {
                 .build();
 
         return accountRepository.save(account);
-
     }
 
     private String generateAccountNumber() {
-        long number = (long) (Math.random() * 9000000000L) + 1000000000L;
+        long number = 1000000000L + (long) (secureRandom.nextDouble() * 9000000000L);
         return String.valueOf(number);
     }
 
     public List<Account> getCurrentUserAccounts() {
         String username = SecurityUtils.getCurrentUserName();
+
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
