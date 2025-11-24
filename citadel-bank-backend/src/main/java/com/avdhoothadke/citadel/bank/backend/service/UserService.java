@@ -66,7 +66,11 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
 
         Optional<PasswordResetToken> existingToken = passwordResetTokenRepository.findByUser(user);
-        existingToken.ifPresent(passwordResetTokenRepository::delete);
+
+        if (existingToken.isPresent()) {
+            passwordResetTokenRepository.delete(existingToken.get());
+            passwordResetTokenRepository.flush();
+        }
 
         String token = UUID.randomUUID().toString();
         PasswordResetToken myToken = new PasswordResetToken();

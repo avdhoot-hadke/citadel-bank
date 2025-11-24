@@ -19,7 +19,7 @@ public class KycService {
     private final ActivityLogService activityLogService;
 
     public KycDocument uploadKyc(MultipartFile file, String documentType) {
-        String username = SecurityUtils.getCurrentUserName();
+        String username = SecurityUtils.getCurrentUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
 
         String fileUrl = fileStorageService.storeFile(file);

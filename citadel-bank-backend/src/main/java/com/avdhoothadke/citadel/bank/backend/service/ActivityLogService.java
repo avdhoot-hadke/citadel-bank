@@ -29,5 +29,4 @@ public class ActivityLogService {
             logRepository.save(log);
         }
     }
-
 }

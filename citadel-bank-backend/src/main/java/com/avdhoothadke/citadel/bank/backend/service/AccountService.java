@@ -1,5 +1,6 @@
 package com.avdhoothadke.citadel.bank.backend.service;
 
+import com.avdhoothadke.citadel.bank.backend.dto.AccountLookupResponse;
 import com.avdhoothadke.citadel.bank.backend.entity.Account;
 import com.avdhoothadke.citadel.bank.backend.entity.User;
 import com.avdhoothadke.citadel.bank.backend.repository.AccountRepository;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +24,7 @@ public class AccountService {
     private static final SecureRandom secureRandom = new SecureRandom();
 
     public Account createAccount(String accountType) {
-        String username = SecurityUtils.getCurrentUserName();
+        String username = SecurityUtils.getCurrentUsername();
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -57,11 +60,25 @@ public class AccountService {
     }
 
     public List<Account> getCurrentUserAccounts() {
-        String username = SecurityUtils.getCurrentUserName();
+        String username = SecurityUtils.getCurrentUsername();
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         return accountRepository.findByUserId(user.getId());
+    }
+
+    public List<AccountLookupResponse> lookupAccountsByEmail(String email) {
+        Optional<List<Account>> accountsOptional = accountRepository.findAllByUserEmail(email);
+
+        List<Account> accountList = accountsOptional.orElse(List.of());
+
+        return accountList.stream()
+                .map(account -> AccountLookupResponse.builder()
+                        .username(account.getUser().getUsername())
+                        .accountNumber(account.getAccountNumber())
+                        .accountType(account.getAccountType())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

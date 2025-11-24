@@ -28,7 +28,7 @@ public class BeneficiaryService {
 
     @Transactional
     public Beneficiary addBeneficiary(String name, String accountNumber) {
-        String username = SecurityUtils.getCurrentUserName();
+        String username = SecurityUtils.getCurrentUsername();
         User currentUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -77,7 +77,7 @@ public class BeneficiaryService {
 
     @Transactional
     public String validateOtp(Long beneficiaryId, String otp) {
-        String username = SecurityUtils.getCurrentUserName();
+        String username = SecurityUtils.getCurrentUsername();
 
         User currentUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -114,7 +114,7 @@ public class BeneficiaryService {
     }
 
     public Page<Beneficiary> getMyBeneficiaries(Pageable pageable) {
-        String username = SecurityUtils.getCurrentUserName();
+        String username = SecurityUtils.getCurrentUsername();
         User currentUser = userRepository.findByUsername(username)
                 .orElseThrow();
         return beneficiaryRepository.findByUserId(currentUser.getId(), pageable);
