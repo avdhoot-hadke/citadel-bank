@@ -12,8 +12,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -50,9 +52,13 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    @Transactional
     public void createPasswordResetToken(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+
+        Optional<PasswordResetToken> existingToken = passwordResetTokenRepository.findByUser(user);
+        existingToken.ifPresent(passwordResetTokenRepository::delete);
 
         String token = UUID.randomUUID().toString();
         PasswordResetToken myToken = new PasswordResetToken();
@@ -62,15 +68,18 @@ public class UserService {
 
         passwordResetTokenRepository.save(myToken);
 
+        //change to frontend link
         String link = baseUrl + "/api/auth/reset-password?token=" + token;
         emailService.sendEmail(email, "Password Reset Request", "Click here to reset your password: " + link);
     }
 
+    @Transactional
     public void resetPassword(String token, String newPassword) {
         PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token)
                 .orElseThrow(() -> new RuntimeException("Invalid token"));
 
         if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            passwordResetTokenRepository.delete(resetToken);
             throw new RuntimeException("Token has expired");
         }
 
