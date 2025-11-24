@@ -17,6 +17,7 @@ import java.util.List;
 public class AccountService {
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
+    private final ActivityLogService activityLogService;
     private static final SecureRandom secureRandom = new SecureRandom();
 
     public Account createAccount(String accountType) {
@@ -40,7 +41,14 @@ public class AccountService {
                 .user(user)
                 .build();
 
-        return accountRepository.save(account);
+        Account savedAccount = accountRepository.save(account);
+        activityLogService.logAction(
+                username,
+                "ACCOUNT_CREATED",
+                "Created " + accountType + " account: " + savedAccount.getAccountNumber()
+        );
+
+        return savedAccount;
     }
 
     private String generateAccountNumber() {

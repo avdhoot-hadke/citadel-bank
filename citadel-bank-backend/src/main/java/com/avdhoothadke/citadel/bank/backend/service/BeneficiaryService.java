@@ -1,9 +1,6 @@
 package com.avdhoothadke.citadel.bank.backend.service;
 
-import com.avdhoothadke.citadel.bank.backend.entity.Account;
-import com.avdhoothadke.citadel.bank.backend.entity.Beneficiary;
-import com.avdhoothadke.citadel.bank.backend.entity.OtpVerification;
-import com.avdhoothadke.citadel.bank.backend.entity.User;
+import com.avdhoothadke.citadel.bank.backend.entity.*;
 import com.avdhoothadke.citadel.bank.backend.repository.AccountRepository;
 import com.avdhoothadke.citadel.bank.backend.repository.BeneficiaryRepository;
 import com.avdhoothadke.citadel.bank.backend.repository.OtpRepository;
@@ -26,6 +23,7 @@ public class BeneficiaryService {
     private final UserRepository userRepository;
     private final OtpRepository otpRepository;
     private final EmailService emailService;
+    private final ActivityLogService activityLogService;
     private static final SecureRandom secureRandom = new SecureRandom();
 
     @Transactional
@@ -54,16 +52,27 @@ public class BeneficiaryService {
 
         Beneficiary savedBeneficiary = beneficiaryRepository.save(beneficiary);
 
+        sendVerificationOtp(currentUser, beneficiary);
+
+        activityLogService.logAction(
+                username,
+                "BENEFICIARY_ADDED_PENDING",
+                "Added beneficiary: " + name + ". Status: Pending OTP"
+        );
+
+        return savedBeneficiary;
+    }
+
+    private void sendVerificationOtp(User user, Beneficiary beneficiary) {
         String otp = String.valueOf(100000 + secureRandom.nextInt(900000));
+
         OtpVerification verification = new OtpVerification();
         verification.setOtp(otp);
-        verification.setBeneficiary(savedBeneficiary);
+        verification.setBeneficiary(beneficiary);
         verification.setExpiryDate(LocalDateTime.now().plusMinutes(10));
         otpRepository.save(verification);
 
-        emailService.sendEmail(currentUser.getEmail(), "Beneficiary Activation OTP", "Your OTP to activate " + name + " is: " + otp);
-
-        return savedBeneficiary;
+        emailService.sendEmail(user.getEmail(), "Beneficiary Activation OTP", "Your OTP to activate " + beneficiary.getName() + " is: " + otp);
     }
 
     @Transactional
@@ -90,11 +99,16 @@ public class BeneficiaryService {
             throw new RuntimeException("Invalid OTP");
         }
 
-
         beneficiary.setActive(true);
         beneficiaryRepository.save(beneficiary);
 
         otpRepository.delete(otpData);
+
+        activityLogService.logAction(
+                username,
+                "BENEFICIARY_ACTIVATED",
+                "Beneficiary " + beneficiary.getName() + " is now active."
+        );
 
         return "Beneficiary Activated Successfully";
     }

@@ -16,6 +16,7 @@ public class KycService {
     private final KycRepository kycRepository;
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
+    private final ActivityLogService activityLogService;
 
     public KycDocument uploadKyc(MultipartFile file, String documentType) {
         String username = SecurityUtils.getCurrentUserName();
@@ -29,6 +30,14 @@ public class KycService {
         kyc.setStatus(KycStatus.PENDING);
         kyc.setUser(user);
 
-        return kycRepository.save(kyc);
+        KycDocument savedKyc = kycRepository.save(kyc);
+
+        activityLogService.logAction(
+                username,
+                "KYC_UPLOADED",
+                "Uploaded " + documentType + " document."
+        );
+
+        return savedKyc;
     }
 }

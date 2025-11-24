@@ -27,6 +27,7 @@ public class UserService {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final ActivityLogService activityLogService;
 
     @Value("${app.base-url}")
     private String baseUrl;
@@ -49,7 +50,14 @@ public class UserService {
                 .roles(Set.of(userRole))
                 .build();
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        activityLogService.logAction(
+                request.getUsername(),
+                "USER_REGISTERED",
+                "New user registration successful"
+        );
+
+        return savedUser;
     }
 
     @Transactional
@@ -71,6 +79,11 @@ public class UserService {
         //change to frontend link
         String link = baseUrl + "/api/auth/reset-password?token=" + token;
         emailService.sendEmail(email, "Password Reset Request", "Click here to reset your password: " + link);
+        activityLogService.logAction(
+                user.getUsername(),
+                "PASSWORD_RESET_REQUEST",
+                "Requested password reset link via email"
+        );
     }
 
     @Transactional
@@ -88,6 +101,12 @@ public class UserService {
         userRepository.save(user);
 
         passwordResetTokenRepository.delete(resetToken);
+
+        activityLogService.logAction(
+                user.getUsername(),
+                "PASSWORD_RESET_COMPLETED",
+                "User successfully changed their password"
+        );
     }
 
 }
