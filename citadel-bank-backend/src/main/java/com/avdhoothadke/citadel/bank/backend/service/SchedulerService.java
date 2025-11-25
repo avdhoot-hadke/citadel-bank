@@ -2,13 +2,13 @@ package com.avdhoothadke.citadel.bank.backend.service;
 
 import com.avdhoothadke.citadel.bank.backend.entity.Account;
 import com.avdhoothadke.citadel.bank.backend.repository.AccountRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 

@@ -37,6 +37,4 @@ public class FraudDetectionService {
         }
         return fraudDetected;
     }
-
-
 }

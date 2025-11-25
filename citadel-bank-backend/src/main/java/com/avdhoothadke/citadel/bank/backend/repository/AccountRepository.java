@@ -18,7 +18,7 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Account> findByAccountNumber(String accountNumber);
 
-    Optional<List<Account>> findAllByUserEmail(String email);
+    List<Account> findAllByUserEmail(String email);
 
     Page<Account> findByAccountType(String accountType, Pageable pageable);
 }

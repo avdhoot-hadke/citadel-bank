@@ -61,7 +61,7 @@ public class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("registered successfully")));
-        System.out.println("✅Test Passed ");
+        System.out.println("✅testRegisterUser_Success Passed ");
     }
 
     @Test
@@ -78,8 +78,7 @@ public class AuthControllerTest {
                 .andExpect(content().string("Check your console for the reset link"));
 
         assertTrue(tokenRepository.findAll().stream().anyMatch(t -> t.getUser().getEmail().equals("forgot@test.com")));
-        System.out.println("✅Test Passed ");
-
+        System.out.println("✅testForgotPassword_Success Passed ");
     }
 
     @Test
@@ -104,8 +103,7 @@ public class AuthControllerTest {
 
         User updatedUser = userRepository.findByUsername("resetUser").get();
         assertTrue(passwordEncoder.matches("newSecurePassword", updatedUser.getPassword()));
-        System.out.println("✅Test Passed ");
-
+        System.out.println("✅testResetPassword_Success Passed ");
     }
 
 }

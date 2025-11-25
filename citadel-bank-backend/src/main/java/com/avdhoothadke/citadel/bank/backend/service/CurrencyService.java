@@ -18,7 +18,7 @@ public class CurrencyService {
     private String apiKey;
 
     private final Map<String, ExchangeRateResponse> cache = new ConcurrentHashMap<>();
-    private LocalDateTime lastFetchTime;
+    private final Map<String, LocalDateTime> lastFetchTime = new ConcurrentHashMap<>();
 
     public CurrencyService(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.baseUrl("https://v6.exchangerate-api.com/v6").build();
@@ -26,8 +26,8 @@ public class CurrencyService {
 
     public Map<String, Double> getExchangeRates(String baseCurrency) {
         if (cache.containsKey(baseCurrency) &&
-                lastFetchTime != null &&
-                lastFetchTime.isAfter(LocalDateTime.now().minusHours(1))) {
+                lastFetchTime.containsKey(baseCurrency) &&
+                lastFetchTime.get(baseCurrency).isAfter(LocalDateTime.now().minusHours(1))) {
 
             System.out.println("Fetching rates from CACHE");
             return cache.get(baseCurrency).getConversion_rates();
@@ -41,7 +41,7 @@ public class CurrencyService {
                     .block();
 
             cache.put(baseCurrency, response);
-            lastFetchTime = LocalDateTime.now();
+            lastFetchTime.put(baseCurrency, LocalDateTime.now());
 
             System.out.println("Fetching rates from API");
             return response.getConversion_rates();

@@ -70,7 +70,6 @@ public class UserService {
     }
 
     public JwtResponse loginUser(LoginRequest request) {
-
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 

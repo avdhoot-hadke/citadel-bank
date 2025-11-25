@@ -23,6 +23,8 @@ public class TransferService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final ActivityLogService activityLogService;
+    private final FraudDetectionService fraudDetectionService;
+    private final LedgerService ledgerService;
 
     @Transactional
     public Transaction performTransfer(TransferRequest request) {
@@ -53,22 +55,33 @@ public class TransferService {
             throw new RuntimeException("Transfer amount must be positive");
         }
 
+        Transaction transaction = Transaction.builder()
+                .amount(request.getAmount())
+                .description(request.getDescription())
+                .sourceAccount(sourceAccount)
+                .targetAccount(targetAccount)
+                .status(TransactionStatus.PENDING)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        boolean isFraud = fraudDetectionService.checkForFraud(transaction);
+        if (isFraud) {
+            transaction.setStatus(TransactionStatus.FRAUD_DETECTED);
+            transactionRepository.save(transaction);
+            throw new RuntimeException("Transfer blocked! Suspicious activity detected.");
+        }
+
         sourceAccount.setBalance(sourceAccount.getBalance().subtract(request.getAmount()));
         accountRepository.save(sourceAccount);
 
         targetAccount.setBalance(targetAccount.getBalance().add(request.getAmount()));
         accountRepository.save(targetAccount);
 
-        Transaction transaction = Transaction.builder()
-                .amount(request.getAmount())
-                .description(request.getDescription())
-                .sourceAccount(sourceAccount)
-                .targetAccount(targetAccount)
-                .status(TransactionStatus.SUCCESS)
-                .timestamp(LocalDateTime.now())
-                .build();
+        transaction.setStatus(TransactionStatus.SUCCESS);
 
         Transaction savedTransaction = transactionRepository.save(transaction);
+
+        ledgerService.recordTransaction(savedTransaction);
 
         activityLogService.logAction(username, "TRANSFER", "Transferred " + request.getAmount() + " to " + request.getTargetAccountNumber());
 

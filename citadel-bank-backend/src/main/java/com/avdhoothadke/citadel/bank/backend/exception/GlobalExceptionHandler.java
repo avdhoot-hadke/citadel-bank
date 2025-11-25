@@ -4,6 +4,7 @@ import com.avdhoothadke.citadel.bank.backend.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -30,4 +31,21 @@ public class GlobalExceptionHandler {
                 ex.getMessage());
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler({AuthenticationException.class})
+    public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException ex) {
+        String message = ex.getMessage();
+
+        if (ex.getCause() instanceof LockedException) {
+            message = ex.getCause().getMessage();
+        }
+
+        ErrorResponse error = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.UNAUTHORIZED.value(),
+                "Authentication Failed",
+                message);
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+    }
+
 }

@@ -9,5 +9,4 @@ import java.util.Optional;
 @Repository
 public interface LedgerRepository extends JpaRepository<LedgerBlock, Long> {
     Optional<LedgerBlock> findTopByOrderByIdDesc();
-
 }

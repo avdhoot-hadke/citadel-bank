@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -69,9 +68,7 @@ public class AccountService {
     }
 
     public List<AccountLookupResponse> lookupAccountsByEmail(String email) {
-        Optional<List<Account>> accountsOptional = accountRepository.findAllByUserEmail(email);
-
-        List<Account> accountList = accountsOptional.orElse(List.of());
+        List<Account> accountList = accountRepository.findAllByUserEmail(email);
 
         return accountList.stream()
                 .map(account -> AccountLookupResponse.builder()
