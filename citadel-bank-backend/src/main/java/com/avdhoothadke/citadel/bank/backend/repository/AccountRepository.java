@@ -1,7 +1,9 @@
 package com.avdhoothadke.citadel.bank.backend.repository;
 
 import com.avdhoothadke.citadel.bank.backend.entity.Account;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -11,6 +13,7 @@ import java.util.Optional;
 public interface AccountRepository extends JpaRepository<Account, Long> {
     List<Account> findByUserId(Long userId);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Account> findByAccountNumber(String accountNumber);
 
     Optional<List<Account>> findAllByUserEmail(String email);

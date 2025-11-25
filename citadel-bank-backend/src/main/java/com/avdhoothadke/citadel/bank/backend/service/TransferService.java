@@ -41,6 +41,10 @@ public class TransferService {
         Account targetAccount = accountRepository.findByAccountNumber(request.getTargetAccountNumber())
                 .orElseThrow(() -> new RuntimeException("Target account not found"));
 
+        if (sourceAccount.getAccountNumber().equals(targetAccount.getAccountNumber())) {
+            throw new RuntimeException("Cannot transfer to the same account");
+        }
+
         if (sourceAccount.getBalance().compareTo(request.getAmount()) < 0) {
             throw new RuntimeException("Insufficient funds");
         }
