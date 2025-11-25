@@ -1,5 +1,7 @@
 package com.avdhoothadke.citadel.bank.backend.controller;
 
+import com.avdhoothadke.citadel.bank.backend.dto.JwtResponse;
+import com.avdhoothadke.citadel.bank.backend.dto.LoginRequest;
 import com.avdhoothadke.citadel.bank.backend.dto.RegisterRequest;
 import com.avdhoothadke.citadel.bank.backend.entity.User;
 import com.avdhoothadke.citadel.bank.backend.service.UserService;
@@ -21,6 +23,12 @@ public class AuthController {
     public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request) {
         User user = userService.registerUser(request);
         return ResponseEntity.ok("User registered successfully: " + user.getUsername());
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<JwtResponse> authenticateUser(@RequestBody LoginRequest loginRequest) {
+        JwtResponse jwt = userService.loginUser(loginRequest);
+        return ResponseEntity.ok(jwt);
     }
 
     @PostMapping("/forgot-password")

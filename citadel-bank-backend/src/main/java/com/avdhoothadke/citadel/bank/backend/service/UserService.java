@@ -1,5 +1,7 @@
 package com.avdhoothadke.citadel.bank.backend.service;
 
+import com.avdhoothadke.citadel.bank.backend.dto.JwtResponse;
+import com.avdhoothadke.citadel.bank.backend.dto.LoginRequest;
 import com.avdhoothadke.citadel.bank.backend.dto.RegisterRequest;
 import com.avdhoothadke.citadel.bank.backend.entity.PasswordResetToken;
 import com.avdhoothadke.citadel.bank.backend.entity.Role;
@@ -8,8 +10,13 @@ import com.avdhoothadke.citadel.bank.backend.entity.User;
 import com.avdhoothadke.citadel.bank.backend.repository.PasswordResetTokenRepository;
 import com.avdhoothadke.citadel.bank.backend.repository.RoleRepository;
 import com.avdhoothadke.citadel.bank.backend.repository.UserRepository;
+import com.avdhoothadke.citadel.bank.backend.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +35,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final ActivityLogService activityLogService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtils jwtUtils;
 
     @Value("${app.base-url}")
     private String baseUrl;
@@ -58,6 +67,23 @@ public class UserService {
         );
 
         return savedUser;
+    }
+
+    public JwtResponse loginUser(LoginRequest request) {
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateJwtToken(authentication);
+        return JwtResponse.builder()
+                .token(jwt)
+                .type("Bearer")
+                .username(authentication.getName())
+                .roles(authentication.getAuthorities().stream()
+                        .map(Object::toString)
+                        .toList())
+                .build();
     }
 
     @Transactional
