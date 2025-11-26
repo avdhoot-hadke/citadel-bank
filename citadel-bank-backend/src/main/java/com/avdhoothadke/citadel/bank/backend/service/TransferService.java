@@ -11,6 +11,7 @@ import com.avdhoothadke.citadel.bank.backend.repository.UserRepository;
 import com.avdhoothadke.citadel.bank.backend.util.SecurityUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -25,6 +26,7 @@ public class TransferService {
     private final ActivityLogService activityLogService;
     private final FraudDetectionService fraudDetectionService;
     private final LedgerService ledgerService;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public Transaction performTransfer(TransferRequest request) {
@@ -32,6 +34,10 @@ public class TransferService {
 
         User currentUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(request.getPin(), currentUser.getPin())) {
+            throw new RuntimeException("Invalid PIN");
+        }
 
         Account sourceAccount = accountRepository.findByAccountNumber(request.getSourceAccountNumber())
                 .orElseThrow(() -> new RuntimeException("Source account not found"));

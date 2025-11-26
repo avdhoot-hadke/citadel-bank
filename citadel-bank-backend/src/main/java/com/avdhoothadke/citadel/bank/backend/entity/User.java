@@ -31,6 +31,9 @@ public class User {
     private int failedLoginAttempts = 0;
     private LocalDateTime lockTime;
 
+    @Column(nullable = false)
+    private String pin;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "users_roles",

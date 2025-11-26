@@ -56,6 +56,7 @@ public class UserService {
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .pin(passwordEncoder.encode(request.getPin()))
                 .roles(Set.of(userRole))
                 .build();
 
