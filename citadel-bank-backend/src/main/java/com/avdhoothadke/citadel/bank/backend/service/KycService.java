@@ -7,6 +7,8 @@ import com.avdhoothadke.citadel.bank.backend.repository.KycRepository;
 import com.avdhoothadke.citadel.bank.backend.repository.UserRepository;
 import com.avdhoothadke.citadel.bank.backend.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,5 +41,16 @@ public class KycService {
         );
 
         return savedKyc;
+    }
+    public Page<KycDocument> getPendingKycs(Pageable pageable) {
+        return kycRepository.findByStatus(KycStatus.PENDING, pageable);
+    }
+
+    public KycDocument updateKycStatus(Long kycId, KycStatus newStatus) {
+        KycDocument kyc = kycRepository.findById(kycId)
+                .orElseThrow(() -> new RuntimeException("KYC Document not found"));
+
+        kyc.setStatus(newStatus);
+        return kycRepository.save(kyc);
     }
 }

@@ -5,6 +5,10 @@ import com.avdhoothadke.citadel.bank.backend.entity.Transaction;
 import com.avdhoothadke.citadel.bank.backend.repository.LedgerRepository;
 import com.google.common.hash.Hashing;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -40,5 +44,36 @@ public class LedgerService {
                 .build();
 
         ledgerRepository.save(block);
+    }
+    public Page<LedgerBlock> getLedger(Pageable pageable) {
+        return ledgerRepository.findAll(pageable);
+    }
+    public String validateLedgerIntegrity() {
+        long totalBlocks = ledgerRepository.count();
+        if (totalBlocks == 0) {
+            return "⚠️ Ledger is Empty.";
+        }
+
+        int batchSize = 1000;
+        int totalPages = (int) Math.ceil((double) totalBlocks / batchSize);
+
+        String previousBlockHash = "GENESIS_HASH_0000";
+
+        for (int i = 0; i < totalPages; i++) {
+            Page<LedgerBlock> page = ledgerRepository.findAll(
+                    PageRequest.of(i, batchSize, Sort.by("id").ascending())
+            );
+
+            for (LedgerBlock currentBlock : page.getContent()) {
+                if (!currentBlock.getPreviousHash().equals(previousBlockHash)) {
+                    return "🚨 LEDGER COMPROMISED at Block ID: " + currentBlock.getId() +
+                            ". Expected Prev: " + previousBlockHash +
+                            ", Found: " + currentBlock.getPreviousHash();
+                }
+                previousBlockHash = currentBlock.getDataHash();
+            }
+        }
+
+        return "✅ Ledger Integrity Verified. " + totalBlocks + " blocks checked. Blockchain is clean.";
     }
 }

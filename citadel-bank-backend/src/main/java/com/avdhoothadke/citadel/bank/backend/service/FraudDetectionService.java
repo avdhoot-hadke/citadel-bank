@@ -5,6 +5,8 @@ import com.avdhoothadke.citadel.bank.backend.entity.Transaction;
 import com.avdhoothadke.citadel.bank.backend.repository.FraudAlertRepository;
 import com.avdhoothadke.citadel.bank.backend.service.fraud.FraudRule;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -36,5 +38,8 @@ public class FraudDetectionService {
             }
         }
         return fraudDetected;
+    }
+    public Page<FraudAlert> getFraudAlerts(Pageable pageable) {
+        return fraudAlertRepository.findAll(pageable);
     }
 }
