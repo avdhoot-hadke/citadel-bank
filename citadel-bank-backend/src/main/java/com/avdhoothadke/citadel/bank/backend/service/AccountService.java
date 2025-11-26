@@ -78,4 +78,17 @@ public class AccountService {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    public Account deposit(Long accountId, BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) throw new RuntimeException("Deposit amount must be positive");
+
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+
+        account.setBalance(account.getBalance().add(amount));
+
+        activityLogService.logAction("SYSTEM", "DEPOSIT", "Deposited " + amount + " to " + account.getAccountNumber());
+
+        return accountRepository.save(account);
+    }
 }

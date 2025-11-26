@@ -11,4 +11,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     Page<Transaction> findBySourceAccountIdOrTargetAccountId(Long sourceId, Long targetId, Pageable pageable);
 
     int countBySourceAccountIdAndTimestampAfter(Long sourceAccountId, LocalDateTime timestamp);
+
+    Page<Transaction> findBySourceAccountIdOrTargetAccountIdOrderByTimestampDesc(Long sourceId, Long targetId, Pageable pageable);
 }

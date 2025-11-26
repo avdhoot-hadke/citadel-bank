@@ -2,14 +2,12 @@ package com.avdhoothadke.citadel.bank.backend.controller;
 
 import com.avdhoothadke.citadel.bank.backend.dto.TransferRequest;
 import com.avdhoothadke.citadel.bank.backend.entity.Transaction;
-import com.avdhoothadke.citadel.bank.backend.service.RateLimitingService;
 import com.avdhoothadke.citadel.bank.backend.service.TransferService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,5 +18,10 @@ public class TransactionController {
     @PostMapping("/transfer")
     public ResponseEntity<Transaction> transferFunds(@RequestBody TransferRequest request) {
         return ResponseEntity.ok(transferService.performTransfer(request));
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<Page<Transaction>> getTransactionHistory(Long accountId, Pageable pageable) {
+        return ResponseEntity.ok(transferService.getTransactionHistory(accountId, pageable));
     }
 }

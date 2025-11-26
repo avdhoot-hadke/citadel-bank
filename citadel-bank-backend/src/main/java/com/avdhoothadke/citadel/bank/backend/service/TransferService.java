@@ -11,6 +11,8 @@ import com.avdhoothadke.citadel.bank.backend.repository.UserRepository;
 import com.avdhoothadke.citadel.bank.backend.util.SecurityUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -92,5 +94,20 @@ public class TransferService {
         activityLogService.logAction(username, "TRANSFER", "Transferred " + request.getAmount() + " to " + request.getTargetAccountNumber());
 
         return savedTransaction;
+    }
+    public Page<Transaction> getTransactionHistory(Long accountId, Pageable pageable) {
+        String username = SecurityUtils.getCurrentUsername();
+        User currentUser = userRepository.findByUsername(username).orElseThrow();
+
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+
+        if (!account.getUser().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("Unauthorized access to account history");
+        }
+
+        return transactionRepository.findBySourceAccountIdOrTargetAccountIdOrderByTimestampDesc(
+                accountId, accountId, pageable
+        );
     }
 }
