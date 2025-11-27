@@ -43,7 +43,7 @@ const TextField = ({
                                         /^(https?:\/\/)?(([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})(:\d{2,5})?(\/.*)?$/,
                                     message: "Please enter a valid URL",
                                 }
-                                : type === "password"
+                                : id === "password"
                                     ? {
                                         value: /^(?=.*[A-Za-z])(?=.*\d).{6,}$/,
                                         message: "Password must contain 6+ characters, 1 letter, and 1 number",

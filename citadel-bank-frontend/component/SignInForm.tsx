@@ -30,7 +30,7 @@ export default function SigninForm() {
             await axios.post("/api/auth/login", data);
 
             toast.success("Login Successful!");
-            router.push("/dashboard");
+            router.push("/");
             router.refresh();
         } catch (error) {
             toast.error("Invalid Credentials");

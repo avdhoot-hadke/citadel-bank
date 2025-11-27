@@ -79,7 +79,7 @@ export default function SignUpForm() {
                         label="Pin"
                         required
                         id="pin"
-                        type="text"
+                        type="password"
                         message="Pin is required"
                         placeholder="Enter Pin"
                         register={register}
@@ -104,7 +104,7 @@ export default function SignUpForm() {
                     disabled={loader}
                     type='submit'
                     className='w-fit px-12 font-semibold hover:bg-slate-700 cursor-pointer hover:text-white text-slate-700 border-[0.5px] border-slate-600   py-2  transition-colors duration-100 rounded-sm mt-6'>
-                    {loader ? "Loading..." : "Login"}
+                    {loader ? "Loading..." : "Register"}
                 </button>
 
                 <p className='text-center text-xs font-light text-slate-700 mt-6'>
