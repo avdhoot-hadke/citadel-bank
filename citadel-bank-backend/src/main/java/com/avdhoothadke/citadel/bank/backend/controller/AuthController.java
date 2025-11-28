@@ -3,6 +3,7 @@ package com.avdhoothadke.citadel.bank.backend.controller;
 import com.avdhoothadke.citadel.bank.backend.dto.JwtResponse;
 import com.avdhoothadke.citadel.bank.backend.dto.LoginRequest;
 import com.avdhoothadke.citadel.bank.backend.dto.RegisterRequest;
+import com.avdhoothadke.citadel.bank.backend.dto.UserResponse;
 import com.avdhoothadke.citadel.bank.backend.entity.User;
 import com.avdhoothadke.citadel.bank.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -37,5 +38,10 @@ public class AuthController {
     public ResponseEntity<?> resetPassword(@RequestParam String token, @RequestParam String newPassword) {
         userService.resetPassword(token, newPassword);
         return ResponseEntity.ok("Password reset successfully");
+    }
+
+    @GetMapping("/user-details")
+    public ResponseEntity<UserResponse> getCurrentUser() {
+        return ResponseEntity.ok(userService.getCurrentUser());
     }
 }

@@ -3,6 +3,7 @@ package com.avdhoothadke.citadel.bank.backend.service;
 import com.avdhoothadke.citadel.bank.backend.dto.JwtResponse;
 import com.avdhoothadke.citadel.bank.backend.dto.LoginRequest;
 import com.avdhoothadke.citadel.bank.backend.dto.RegisterRequest;
+import com.avdhoothadke.citadel.bank.backend.dto.UserResponse;
 import com.avdhoothadke.citadel.bank.backend.entity.PasswordResetToken;
 import com.avdhoothadke.citadel.bank.backend.entity.Role;
 import com.avdhoothadke.citadel.bank.backend.entity.RoleName;
@@ -11,6 +12,7 @@ import com.avdhoothadke.citadel.bank.backend.repository.PasswordResetTokenReposi
 import com.avdhoothadke.citadel.bank.backend.repository.RoleRepository;
 import com.avdhoothadke.citadel.bank.backend.repository.UserRepository;
 import com.avdhoothadke.citadel.bank.backend.util.JwtUtils;
+import com.avdhoothadke.citadel.bank.backend.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -76,6 +78,7 @@ public class UserService {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
+
         return JwtResponse.builder()
                 .token(jwt)
                 .type("Bearer")
@@ -139,4 +142,17 @@ public class UserService {
         );
     }
 
+    public UserResponse getCurrentUser() {
+        String username = SecurityUtils.getCurrentUsername();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return UserResponse.builder()
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .roles(user.getRoles().stream()
+                        .map(role -> role.getName().name())
+                        .toList())
+                .build();
+    }
 }
