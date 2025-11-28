@@ -1,6 +1,22 @@
+import BentoGrid from "@/component/BentoGrid";
+import CTASection from "@/component/CTA";
+import Footer from "@/component/Footer";
+import Hero from "@/component/Hero";
+import LiveStatsBar from "@/component/LiveStatsBar";
+import Navbar from "@/component/Navbar";
+import { cookies } from "next/headers";
 
-export default function Home() {
+export default async function Home() {
   return (
-    <h1 className="text-black text-5xl">Hello world</h1>
+    <div className="min-h-screen bg-slate-950 text-white selection:bg-blue-500/30">
+      <Navbar />
+      <main>
+        <Hero />
+        <LiveStatsBar />
+        <BentoGrid />
+        <CTASection />
+      </main>
+      <Footer />
+    </div>
   );
 }

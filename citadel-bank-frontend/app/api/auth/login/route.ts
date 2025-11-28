@@ -9,20 +9,24 @@ export async function POST(request: any) {
 
         const response = await axiosClient.post('/api/auth/login', body);
 
+        const { token, username, roles } = response.data;
 
-        const { accessToken } = response.data;
         const cookiesStore = await cookies();
 
         cookiesStore.set({
             name: 'token',
-            value: accessToken,
+            value: token,
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             maxAge: 60 * 60 * 24,
             path: '/',
         });
 
-        return NextResponse.json({ message: 'Login successful' });
+        return NextResponse.json({
+            message: 'Login successful',
+            username,
+            roles,
+        });
 
     } catch (error: any) {
         console.error("Login Error:", error.response?.data || error.message);

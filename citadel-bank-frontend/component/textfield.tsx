@@ -20,8 +20,8 @@ const TextField = ({
                 type={type}
                 id={id}
                 placeholder={placeholder}
-                className={`px-2 py-2 border-[0.5px] outline-none bg-transparent text-slate-700 rounded-md 
-                    ${errors[id] ? "border-red-500" : "border-slate-600"}
+                className={`px-2 py-2 border-[0.5px] outline-none bg-transparent text-slate-700 rounded-md  border-slate-200 hover:border-blue-200 transition-all duration-300
+                    ${errors[id] ? "border-red-500" : "border-slate-400"}
                     ${className}
                 `}
                 {...register(id, {

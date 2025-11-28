@@ -8,10 +8,12 @@ import TextField from "./textfield";
 import Link from "next/link";
 import axiosClient from "@/lib/axiosClient";
 import axios from "axios";
+import { useAuth } from "@/context/AuthContext";
 
 export default function SigninForm() {
     const [loader, setLoader] = useState(false);
     const router = useRouter();
+    const { login } = useAuth();
 
     type Inputs = {
         username: string,
@@ -27,7 +29,11 @@ export default function SigninForm() {
     const loginHandler = async (data: any) => {
         setLoader(true);
         try {
-            await axios.post("/api/auth/login", data);
+            const res = await axios.post("/api/auth/login", data);
+
+            if (res.data.username) {
+                login({ username: res.data.username, roles: res.data.roles });
+            }
 
             toast.success("Login Successful!");
             router.push("/");
