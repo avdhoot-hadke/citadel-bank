@@ -19,7 +19,7 @@ public class RateLimitingService {
     }
 
     private Bucket newBucket(String userId) {
-        Bandwidth limit = Bandwidth.classic(5, Refill.greedy(5, Duration.ofMinutes(1)));
+        Bandwidth limit = Bandwidth.classic(25, Refill.greedy(25, Duration.ofMinutes(1)));
         return Bucket.builder()
                 .addLimit(limit)
                 .build();

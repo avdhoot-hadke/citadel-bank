@@ -1,5 +1,6 @@
 package com.avdhoothadke.citadel.bank.backend.controller;
 
+import com.avdhoothadke.citadel.bank.backend.dto.AccountDTO;
 import com.avdhoothadke.citadel.bank.backend.dto.AccountLookupResponse;
 import com.avdhoothadke.citadel.bank.backend.entity.Account;
 import com.avdhoothadke.citadel.bank.backend.service.AccountService;
@@ -19,13 +20,13 @@ public class AccountController {
     private final AccountService accountService;
 
     @PostMapping
-    public ResponseEntity<Account> createAccount(@RequestBody Map<String, String> request) {
+    public ResponseEntity<AccountDTO> createAccount(@RequestBody Map<String, String> request) {
         String type = request.get("accountType");
         return ResponseEntity.ok(accountService.createAccount(type));
     }
 
     @GetMapping
-    public ResponseEntity<List<Account>> getMyAccounts() {
+    public ResponseEntity<List<AccountDTO>> getMyAccounts() {
         return ResponseEntity.ok(accountService.getCurrentUserAccounts());
     }
 
@@ -39,4 +40,6 @@ public class AccountController {
     public ResponseEntity<Account> deposit(@PathVariable Long id, @RequestBody Map<String, BigDecimal> request) {
         return ResponseEntity.ok(accountService.deposit(id, request.get("amount")));
     }
+
+
 }

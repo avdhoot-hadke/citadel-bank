@@ -1,5 +1,6 @@
 package com.avdhoothadke.citadel.bank.backend.controller;
 
+import com.avdhoothadke.citadel.bank.backend.dto.TransactionDTO;
 import com.avdhoothadke.citadel.bank.backend.dto.TransferRequest;
 import com.avdhoothadke.citadel.bank.backend.entity.Transaction;
 import com.avdhoothadke.citadel.bank.backend.service.TransferService;
@@ -16,12 +17,12 @@ public class TransactionController {
     private final TransferService transferService;
 
     @PostMapping("/transfer")
-    public ResponseEntity<Transaction> transferFunds(@RequestBody TransferRequest request) {
+    public ResponseEntity<TransactionDTO> transferFunds(@RequestBody TransferRequest request) {
         return ResponseEntity.ok(transferService.performTransfer(request));
     }
 
     @GetMapping("/history")
-    public ResponseEntity<Page<Transaction>> getTransactionHistory(Long accountId, Pageable pageable) {
-        return ResponseEntity.ok(transferService.getTransactionHistory(accountId, pageable));
+    public ResponseEntity<Page<TransactionDTO>> getTransactionHistory(Pageable pageable) {
+        return ResponseEntity.ok(transferService.getTransactionHistory(pageable));
     }
 }

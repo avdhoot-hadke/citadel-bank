@@ -1,5 +1,6 @@
 package com.avdhoothadke.citadel.bank.backend.service;
 
+import com.avdhoothadke.citadel.bank.backend.dto.TransactionDTO;
 import com.avdhoothadke.citadel.bank.backend.dto.TransferRequest;
 import com.avdhoothadke.citadel.bank.backend.entity.Account;
 import com.avdhoothadke.citadel.bank.backend.entity.Transaction;
@@ -9,12 +10,12 @@ import com.avdhoothadke.citadel.bank.backend.repository.AccountRepository;
 import com.avdhoothadke.citadel.bank.backend.repository.TransactionRepository;
 import com.avdhoothadke.citadel.bank.backend.repository.UserRepository;
 import com.avdhoothadke.citadel.bank.backend.util.SecurityUtils;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -31,7 +32,7 @@ public class TransferService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public Transaction performTransfer(TransferRequest request) {
+    public TransactionDTO performTransfer(TransferRequest request) {
         String username = SecurityUtils.getCurrentUsername();
 
         User currentUser = userRepository.findByUsername(username)
@@ -93,21 +94,31 @@ public class TransferService {
 
         activityLogService.logAction(username, "TRANSFER", "Transferred " + request.getAmount() + " to " + request.getTargetAccountNumber());
 
-        return savedTransaction;
+        return mapToDTO(savedTransaction);
     }
-    public Page<Transaction> getTransactionHistory(Long accountId, Pageable pageable) {
+
+    private TransactionDTO mapToDTO(Transaction transaction) {
+        return TransactionDTO.builder()
+                .id(transaction.getId())
+                .amount(transaction.getAmount())
+                .description(transaction.getDescription())
+                .timestamp(transaction.getTimestamp())
+                .status(transaction.getStatus().name())
+                .sourceAccountNumber(transaction.getSourceAccount().getAccountNumber())
+                .targetAccountNumber(transaction.getTargetAccount().getAccountNumber())
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<TransactionDTO> getTransactionHistory(Pageable pageable) {
         String username = SecurityUtils.getCurrentUsername();
-        User currentUser = userRepository.findByUsername(username).orElseThrow();
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+        // Use the new repository method
+        Page<Transaction> transactions = transactionRepository.findAllByUserId(currentUser.getId(), pageable);
 
-        if (!account.getUser().getId().equals(currentUser.getId())) {
-            throw new RuntimeException("Unauthorized access to account history");
-        }
+        return transactions.map(this::mapToDTO);
 
-        return transactionRepository.findBySourceAccountIdOrTargetAccountIdOrderByTimestampDesc(
-                accountId, accountId, pageable
-        );
     }
 }

@@ -4,6 +4,7 @@ import com.avdhoothadke.citadel.bank.backend.entity.FraudAlert;
 import com.avdhoothadke.citadel.bank.backend.entity.KycDocument;
 import com.avdhoothadke.citadel.bank.backend.entity.KycStatus;
 import com.avdhoothadke.citadel.bank.backend.entity.LedgerBlock;
+import com.avdhoothadke.citadel.bank.backend.service.AccountService;
 import com.avdhoothadke.citadel.bank.backend.service.FraudDetectionService;
 import com.avdhoothadke.citadel.bank.backend.service.KycService;
 import com.avdhoothadke.citadel.bank.backend.service.LedgerService;
@@ -14,6 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
@@ -23,6 +27,17 @@ public class AdminController {
     private final KycService kycService;
     private final FraudDetectionService fraudService;
     private final LedgerService ledgerService;
+    private final AccountService accountService;
+
+    @PostMapping("/accounts/credit")
+    public ResponseEntity<?> creditAccount(@RequestBody Map<String, Object> request) {
+        String accountNumber = String.valueOf(request.get("accountNumber"));
+        BigDecimal amount = new BigDecimal(String.valueOf(request.get("amount")));
+
+        accountService.deposit(accountNumber, amount);
+
+        return ResponseEntity.ok("Account " + accountNumber + " credited with " + amount);
+    }
 
     @GetMapping("/kyc/pending")
     public ResponseEntity<Page<KycDocument>> getPendingKycs(Pageable pageable) {

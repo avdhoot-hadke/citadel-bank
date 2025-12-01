@@ -1,11 +1,13 @@
 package com.avdhoothadke.citadel.bank.backend.service;
 
+import com.avdhoothadke.citadel.bank.backend.dto.AccountDTO;
 import com.avdhoothadke.citadel.bank.backend.dto.AccountLookupResponse;
 import com.avdhoothadke.citadel.bank.backend.entity.Account;
 import com.avdhoothadke.citadel.bank.backend.entity.User;
 import com.avdhoothadke.citadel.bank.backend.repository.AccountRepository;
 import com.avdhoothadke.citadel.bank.backend.repository.UserRepository;
 import com.avdhoothadke.citadel.bank.backend.util.SecurityUtils;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +24,8 @@ public class AccountService {
     private final ActivityLogService activityLogService;
     private static final SecureRandom secureRandom = new SecureRandom();
 
-    public Account createAccount(String accountType) {
+    @Transactional
+    public AccountDTO createAccount(String accountType) {
         String username = SecurityUtils.getCurrentUsername();
 
         User user = userRepository.findByUsername(username)
@@ -50,7 +53,7 @@ public class AccountService {
                 "Created " + accountType + " account: " + savedAccount.getAccountNumber()
         );
 
-        return savedAccount;
+        return mapToDTO(savedAccount);
     }
 
     private String generateAccountNumber() {
@@ -58,13 +61,43 @@ public class AccountService {
         return String.valueOf(number);
     }
 
-    public List<Account> getCurrentUserAccounts() {
+    public List<AccountDTO> getCurrentUserAccounts() {
         String username = SecurityUtils.getCurrentUsername();
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return accountRepository.findByUserId(user.getId());
+        List<Account> accounts = accountRepository.findByUserId(user.getId());
+
+        return accounts.stream()
+                .map(this::mapToDTO).collect(Collectors.toList());
+    }
+
+    private AccountDTO mapToDTO(Account account) {
+        return AccountDTO.builder()
+                .id(account.getId())
+                .accountNumber(account.getAccountNumber())
+                .balance(account.getBalance())
+                .accountType(account.getAccountType())
+                .username(account.getUser().getUsername())
+                .email(account.getUser().getEmail())
+                .build();
+    }
+
+    @Transactional
+    public void deposit(String accountNumber, BigDecimal amount) {
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+
+        account.setBalance(account.getBalance().add(amount));
+        accountRepository.save(account);
+
+        String adminUsername = SecurityUtils.getCurrentUsername();
+        activityLogService.logAction(
+                adminUsername,
+                "ADMIN_DEPOSIT",
+                "Deposited " + amount + " to account " + accountNumber
+        );
     }
 
     public List<AccountLookupResponse> lookupAccountsByEmail(String email) {
