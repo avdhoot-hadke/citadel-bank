@@ -37,7 +37,7 @@ export const Navbar = () => {
     };
 
     return (
-        <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm' : 'bg-transparent'
+        <nav className={`fixed top-0 w-full  z-50 transition-all duration-300 ${scrolled ? 'bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm' : 'backdrop-blur-sm'
             }`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-20">
@@ -95,12 +95,10 @@ export const Navbar = () => {
 
             {/* Mobile Menu */}
             {isOpen && (
-                <div className="md:hidden bg-white border-b border-slate-200 animate-in slide-in-from-top-5 duration-200 shadow-xl">
+                <div className="md:hidden  border-b border-slate-200 animate-in slide-in-from-top-5 duration-200 shadow-xl">
                     <div className="px-4 pt-2 pb-6 space-y-2">
                         <a href="#" className="block px-3 py-3 text-base font-medium text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-md">Features</a>
-                        {/* <a href="#" className="block px-3 py-3 text-base font-medium text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-md">Enterprise</a> */}
-                        {/* <a href="#" className="block px-3 py-3 text-base font-medium text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-md">Developers</a> */}
-                        <div className="border-t border-slate-100 my-2"></div>
+                        <div className="border-t border-slate-100 my-2 bg-yellow-200"></div>
                         {isLoggedIn ? (
                             <>
                                 <Link

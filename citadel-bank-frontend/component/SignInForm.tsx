@@ -50,11 +50,11 @@ export default function SigninForm() {
             className='flex justify-center items-center'>
             <form onSubmit={handleSubmit(loginHandler)}
                 className="flex flex-col w-full justify-center items-center">
-                <h1 className="text-center font-thin lg:text-3xl text-2xl mb-8">
+                <h1 className="text-3xl font-bold text-slate-900 group-hover:text-blue-700 transition-colors mb-8">
                     Login
                 </h1>
 
-                <div className="flex flex-col gap-3 lg:w-[] sm:w-2/3 w-full sm:px-0 px-8">
+                <div className="flex flex-col gap-3 lg:w-[] sm:w-2/3 w-full sm:px-0 px-8 ">
                     <TextField
                         label="Username"
                         required

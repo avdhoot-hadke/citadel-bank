@@ -11,8 +11,8 @@ const TextField = ({
     placeholder,
 }: { [key: string]: any }) => {
     return (
-        <div className="flex flex-col gap-1 w-full">
-            <label htmlFor={id} className={`${className} font-thin text-md`}>
+        <div className="flex flex-col gap-1 w-full text-slate-600 leading-relaxed">
+            <label htmlFor={id} className={`${className}  text-sm text-slate-400`}>
                 {label}
             </label>
 
@@ -20,7 +20,7 @@ const TextField = ({
                 type={type}
                 id={id}
                 placeholder={placeholder}
-                className={`px-2 py-2 border-[0.5px] outline-none bg-transparent text-slate-700 rounded-md  border-slate-200 hover:border-blue-200 transition-all duration-300
+                className={`px-2 py-2 border-[0.5px] outline-none bg-transparent text-slate-400 text-sm rounded-md  border-slate-200 hover:border-blue-200 transition-all duration-300
                     ${errors[id] ? "border-red-500" : "border-slate-400"}
                     ${className}
                 `}

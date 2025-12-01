@@ -36,7 +36,7 @@ const LiveStatsBar = () => {
 
             {/* Inline styles for custom marquee animation since it's not default Tailwind */}
             <style>{`
-        .animate-marquee {
+         .animate-marquee {
           animation: marquee 25s linear infinite;
         }
         @keyframes marquee {

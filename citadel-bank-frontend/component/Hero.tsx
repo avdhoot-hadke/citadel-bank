@@ -35,7 +35,7 @@ const Hero = () => {
                 </p>
 
                 <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center items-center animate-in fade-in slide-in-from-bottom-7 duration-1000 delay-200 fill-mode-backwards">
-                    <button className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40">
+                    <button className="group transition-all duration-300 w-full sm:w-[220px]   inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-blue-700  shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40">
                         Open Account
                         <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                     </button>

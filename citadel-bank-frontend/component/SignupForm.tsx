@@ -48,7 +48,7 @@ export default function SignUpForm() {
             className='flex justify-center items-center'>
             <form onSubmit={handleSubmit(registerHandler)}
                 className="flex flex-col w-full justify-center items-center">
-                <h1 className="text-center font-thin lg:text-3xl text-2xl mb-8">
+                <h1 className="text-3xl font-bold text-slate-900 group-hover:text-blue-700 transition-colors mb-8">
                     Register
                 </h1>
 
