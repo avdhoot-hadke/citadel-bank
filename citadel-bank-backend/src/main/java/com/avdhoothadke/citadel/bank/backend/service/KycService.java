@@ -26,7 +26,9 @@ public class KycService {
 
         String fileUrl = fileStorageService.storeFile(file);
 
-        KycDocument kyc = new KycDocument();
+        KycDocument kyc = kycRepository.findByUser(user)
+                .orElse(new KycDocument());
+
         kyc.setDocumentType(documentType);
         kyc.setDocumentUrl(fileUrl);
         kyc.setStatus(KycStatus.PENDING);
@@ -52,5 +54,11 @@ public class KycService {
 
         kyc.setStatus(newStatus);
         return kycRepository.save(kyc);
+    }
+
+    public KycDocument getMyKyc() {
+        String username = SecurityUtils.getCurrentUsername();
+        User user = userRepository.findByUsername(username).orElseThrow();
+        return kycRepository.findByUser(user).orElse(null);
     }
 }
