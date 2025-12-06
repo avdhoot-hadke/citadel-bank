@@ -29,7 +29,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         <>
 
             <aside
-                className={`fixed top-20 left-0 h-[calc(100vh-80px)] bg-slate-900 text-white transition-all duration-500
+                className={`fixed top-20 left-0 h-[calc(100vh-80px)] bg-slate-900 text-white transition-all duration-200
         ${isCollapsed ? "w-16" : "w-56"}
     `}
             >

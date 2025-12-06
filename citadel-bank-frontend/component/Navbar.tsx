@@ -37,23 +37,24 @@ export const Navbar = () => {
     };
 
     return (
-        <nav className={`fixed top-0 w-full  z-50 transition-all duration-300 ${scrolled ? 'bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm' : 'backdrop-blur-sm'
+        <nav className={`fixed top-0 w-full shadow-2xs  z-50 transition-all duration-300 ${scrolled ? 'bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm' : 'backdrop-blur-sm'
             }`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-20">
                     {/* Logo */}
-                    <div className="flex-shrink-0 flex items-center gap-2 cursor-pointer group">
-                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-600/20 group-hover:scale-105 transition-all">
-                            <ShieldCheck size={18} strokeWidth={2.5} />
+                    <Link href="/">
+                        <div className="flex-shrink-0 flex items-center gap-2 cursor-pointer group">
+                            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-600/20 group-hover:scale-105 transition-all">
+                                <ShieldCheck size={18} strokeWidth={2.5} />
+                            </div>
+                            <span className="font-bold text-xl tracking-tight text-slate-900 group-hover:text-blue-600 transition-colors">
+                                Citadel
+                            </span>
                         </div>
-                        <span className="font-bold text-xl tracking-tight text-slate-900 group-hover:text-blue-600 transition-colors">
-                            Citadel
-                        </span>
-                    </div>
-
+                    </Link>
                     {/* Desktop Navigation */}
                     <div className="hidden md:flex items-center space-x-8">
-                        <a href="#features" className="text-slate-600 hover:text-blue-600 transition-colors text-sm font-medium">Features</a>
+                        <Link href="/#features" className="text-slate-600 hover:text-blue-600 transition-colors text-sm font-medium">Features</Link>
                         {/* <a href="#" className="text-slate-600 hover:text-blue-600 transition-colors text-sm font-medium">Enterprise</a> */}
                         {/* <a href="#" className="text-slate-600 hover:text-blue-600 transition-colors text-sm font-medium">Developers</a> */}
                         <div className="h-4 w-px bg-slate-200 mx-2"></div>

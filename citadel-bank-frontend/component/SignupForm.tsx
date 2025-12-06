@@ -34,9 +34,10 @@ export default function SignUpForm() {
 
             toast.success("Registration Successful!");
             router.push("/auth/signin");
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            toast.error("Registration Failed!");
+            const errorMessage = error.response.data || "Registration Failed!"
+            toast.error(errorMessage);
         } finally {
             setLoader(false);
         }

@@ -11,10 +11,10 @@ export async function POST(request: Request) {
         return NextResponse.json(response.data);
 
     } catch (error: any) {
-        console.error("Registration Error:", error.response?.data || error.message);
+        console.error("Registration Error:", error.response?.data?.message || error.message);
 
         const status = error.response?.status || 500;
-        const message = error.response?.data || "Registration Failed";
+        const message = error.response?.data?.message || "Registration Failed";
 
         return NextResponse.json(message, { status });
     }

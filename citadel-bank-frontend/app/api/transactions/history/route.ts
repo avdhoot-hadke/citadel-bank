@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import axiosClient from '@/lib/axiosClient';
 import { cookies } from 'next/headers';
+import { isAxiosError } from 'axios';
 
 export async function GET(request: Request) {
     try {
@@ -27,11 +28,14 @@ export async function GET(request: Request) {
         // 4. Return Data to Frontend
         return NextResponse.json(response.data);
 
-    } catch (error: any) {
-        console.error("Transaction History Error:", error.response?.data || error.message);
-        return NextResponse.json(
-            error.response?.data || { message: "Error fetching transactions" },
-            { status: error.response?.status || 500 }
-        );
+    } catch (error: unknown) {
+        if (isAxiosError(error)) {
+            console.error("Transaction History Error:", error.response?.data || error.message);
+            return NextResponse.json(
+                error.response?.data || { message: "Error fetching transactions" },
+                { status: error.response?.status || 500 }
+            );
+        }
+
     }
 }

@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { ArrowRight, Loader2, ShieldCheck, Wallet, UserCheck } from 'lucide-react';
+import { ArrowRight, Loader2, ShieldCheck, Wallet, UserCheck, ChevronDown } from 'lucide-react';
 
 interface Account {
     id: number;
@@ -13,11 +13,20 @@ interface Account {
     accountType: string;
 }
 
+interface Beneficiary {
+    id: number;
+    name: string;
+    accountNumber: string;
+    active: boolean;
+}
+
 export default function TransferPage() {
     const router = useRouter();
 
     // State
     const [accounts, setAccounts] = useState<Account[]>([]);
+    const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
+
     const [selectedAccount, setSelectedAccount] = useState<string>('');
     const [targetAccount, setTargetAccount] = useState('');
     const [amount, setAmount] = useState('');
@@ -27,22 +36,32 @@ export default function TransferPage() {
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(true);
 
-    // 1. Fetch User Accounts
+    // 1. Fetch User Accounts & Beneficiaries
     useEffect(() => {
-        const fetchAccounts = async () => {
+        const fetchData = async () => {
             try {
-                const res = await axios.get<Account[]>('/api/accounts');
-                if (Array.isArray(res.data) && res.data.length > 0) {
-                    setAccounts(res.data);
-                    setSelectedAccount(res.data[0].accountNumber);
+                // Parallel fetching
+                const [accRes, benRes] = await Promise.all([
+                    axios.get<Account[]>('/api/accounts'),
+                    axios.get('/api/beneficiaries?size=100') // Get all for dropdown
+                ]);
+
+                if (Array.isArray(accRes.data) && accRes.data.length > 0) {
+                    setAccounts(accRes.data);
+                    setSelectedAccount(accRes.data[0].accountNumber);
                 }
+
+                // Only show ACTIVE beneficiaries
+                const activeBeneficiaries = (benRes.data.content || []).filter((b: Beneficiary) => b.active);
+                setBeneficiaries(activeBeneficiaries);
+
             } catch (error) {
-                toast.error("Failed to load accounts");
+                toast.error("Failed to load banking data");
             } finally {
                 setFetching(false);
             }
         };
-        fetchAccounts();
+        fetchData();
     }, []);
 
     // 2. Handle Transfer
@@ -51,7 +70,6 @@ export default function TransferPage() {
         setLoading(true);
 
         try {
-            // Call the Next.js Route Handler Proxy
             await axios.post('/api/transactions/transfer', {
                 sourceAccountNumber: selectedAccount,
                 targetAccountNumber: targetAccount,
@@ -62,30 +80,31 @@ export default function TransferPage() {
 
             toast.success("Transfer Successful!");
             router.push('/dashboard');
-        } catch (error: any) {
-            const msg = error.response?.data?.message || "Transfer failed";
-            toast.error(msg);
+        } catch (error: unknown) {
+            if (isAxiosError(error)) {
+                // Handle Spring Boot Error Message
+                const msg = error.response?.data?.message || "Transfer failed";
+                toast.error(msg);
+            }
         } finally {
             setLoading(false);
         }
     };
 
-    if (fetching) return <div className="p-10 flex justify-center"><Loader2 className="animate-spin text-blue-600" /></div>;
+    if (fetching) return <div className="flex h-96 items-center justify-center"><Loader2 className="animate-spin text-indigo-600 h-8 w-8" /></div>;
 
-    // Get selected account details for validation UI
     const currentAcc = accounts.find(a => a.accountNumber === selectedAccount);
     const currentBalance = currentAcc?.balance || 0;
 
     return (
         <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
 
-            {/* Header */}
             <div>
                 <h1 className="text-2xl font-bold text-slate-900">Transfer Money</h1>
                 <p className="text-slate-500">Securely send funds to another Citadel account.</p>
             </div>
 
-            <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+            <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-xl">
                 <form onSubmit={handleTransfer} className="space-y-6">
 
                     {/* FROM: Select Account */}
@@ -95,7 +114,7 @@ export default function TransferPage() {
                             <select
                                 value={selectedAccount}
                                 onChange={(e) => setSelectedAccount(e.target.value)}
-                                className="w-full p-3 pl-10 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none text-slate-900"
+                                className="w-full p-3 pl-10 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none text-slate-900 font-medium"
                             >
                                 {accounts.map(acc => (
                                     <option key={acc.id} value={acc.accountNumber}>
@@ -104,22 +123,45 @@ export default function TransferPage() {
                                 ))}
                             </select>
                             <Wallet className="absolute left-3 top-3.5 text-slate-400" size={18} />
+                            <ChevronDown className="absolute right-3 top-3.5 text-slate-400 pointer-events-none" size={18} />
                         </div>
                         <p className="text-xs text-right mt-2 text-slate-500">
                             Available: <span className="font-bold text-emerald-600">${currentBalance}</span>
                         </p>
                     </div>
 
-                    {/* TO: Target Account */}
+                    {/* TO: Target Account (Smart Input) */}
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">Recipient Account Number</label>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Recipient</label>
+
+                        {/* Option A: Dropdown if beneficiaries exist */}
+                        {beneficiaries.length > 0 && (
+                            <div className="mb-3 relative">
+                                <select
+                                    onChange={(e) => setTargetAccount(e.target.value)}
+                                    className="w-full p-3 pl-10 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none appearance-none text-slate-900"
+                                    defaultValue=""
+                                >
+                                    <option value="" disabled>Select a beneficiary...</option>
+                                    {beneficiaries.map(b => (
+                                        <option key={b.id} value={b.accountNumber}>
+                                            {b.name} ({b.accountNumber})
+                                        </option>
+                                    ))}
+                                </select>
+                                <UserCheck className="absolute left-3 top-3.5 text-slate-400" size={18} />
+                                <ChevronDown className="absolute right-3 top-3.5 text-slate-400 pointer-events-none" size={18} />
+                            </div>
+                        )}
+
+                        {/* Option B: Manual Input */}
                         <div className="relative">
                             <input
                                 type="text"
-                                placeholder="Enter 10-digit account number"
+                                placeholder="Or enter 10-digit account number manually"
                                 value={targetAccount}
                                 onChange={(e) => setTargetAccount(e.target.value)}
-                                className="w-full p-3 pl-10 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                className="w-full p-3 pl-10 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-mono"
                                 required
                                 minLength={10}
                                 maxLength={10}
@@ -139,10 +181,11 @@ export default function TransferPage() {
                                     placeholder="0.00"
                                     value={amount}
                                     onChange={(e) => setAmount(e.target.value)}
-                                    className="w-full p-3 pl-8 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                    className="w-full p-3 pl-8 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold text-slate-900"
                                     required
                                     min="1"
-                                    max={currentBalance} // UI Validation
+                                    step="0.01"
+                                    max={currentBalance}
                                 />
                             </div>
                         </div>
@@ -153,34 +196,36 @@ export default function TransferPage() {
                                 placeholder="Lunch, Rent..."
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
-                                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                             />
                         </div>
                     </div>
 
                     {/* PIN Authorization */}
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">Authorize with PIN</label>
+                    <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                        <label className="block text-sm font-medium text-indigo-900 mb-2">Authorize with PIN</label>
                         <div className="relative">
                             <input
                                 type="password"
                                 placeholder="Enter 4-digit PIN"
                                 value={pin}
                                 onChange={(e) => setPin(e.target.value)}
-                                className="w-full p-3 pl-10 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                className="w-full p-3 pl-10 bg-white border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all tracking-widest font-bold"
                                 required
                                 maxLength={4}
                             />
-                            <ShieldCheck className="absolute left-3 top-3.5 text-slate-400" size={18} />
+                            <ShieldCheck className="absolute left-3 top-3.5 text-indigo-400" size={18} />
                         </div>
-                        <p className="text-xs text-slate-500 mt-1">This action cannot be undone.</p>
+                        <p className="text-xs text-indigo-600/70 mt-2 flex items-center gap-1">
+                            <ShieldCheck size={12} /> Secure Transaction via Citadel Protocol
+                        </p>
                     </div>
 
                     {/* Action Button */}
                     <button
                         type="submit"
-                        disabled={loading || parseFloat(amount) > currentBalance || !targetAccount || !pin}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-500/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={loading || parseFloat(amount) > currentBalance || !targetAccount || pin.length < 4}
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-500/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-[0.98]"
                     >
                         {loading ? <Loader2 className="animate-spin" /> : <>Transfer Funds <ArrowRight size={20} /></>}
                     </button>

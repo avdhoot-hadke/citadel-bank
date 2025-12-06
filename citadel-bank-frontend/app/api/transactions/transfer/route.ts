@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import axiosClient from '@/lib/axiosClient';
 import { cookies } from 'next/headers';
+import { isAxiosError } from 'axios';
 
 export async function POST(request: Request) {
     try {
@@ -18,10 +19,17 @@ export async function POST(request: Request) {
         });
 
         return NextResponse.json(response.data);
-    } catch (error: any) {
+    } catch (error: unknown) {
+        if (isAxiosError(error)) {
+            return NextResponse.json(
+                error.response?.data ?? { message: "Transfer failed" },
+                { status: error.response?.status ?? 500 }
+            );
+        }
+
         return NextResponse.json(
-            error.response?.data || { message: "Transfer failed" },
-            { status: error.response?.status || 500 }
+            { message: "Unexpected error occurred" },
+            { status: 500 }
         );
     }
 }

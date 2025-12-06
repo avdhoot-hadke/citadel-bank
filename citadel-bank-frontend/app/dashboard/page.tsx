@@ -82,11 +82,11 @@ export default function DashboardPage() {
     }, [accounts]);
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'INR' }).format(amount);
     };
 
     const handleOpenAccount = async () => {
-        router.push("/dashboard/account");
+        router.push("/dashboard/accounts");
     };
 
     if (loading) return <DashboardSkeleton />;
